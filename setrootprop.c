@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <X11/Xutil.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,8 +15,9 @@ int main(int argc, char *argv[])
 	time_t timeval;
 	int status = 0;
 	char buffer[64];
-	char *error = "Cock Error" ;
+	char *error = "Clock Error" ;
 	int clock_error = 0;
+	XTextProperty prop;
 
 	display = XOpenDisplay(NULL);
 	if(display)
@@ -28,6 +30,8 @@ int main(int argc, char *argv[])
 			if (tm == NULL)
 			{
 				clock_error = 1;	
+				retval = 8;
+				stop = 1;
 			}
 			if (!clock_error)
 			{
@@ -36,7 +40,19 @@ int main(int argc, char *argv[])
 					"%H:%M:%S", 
 					tm);
 			}
-			XStoreName(display, defaultRootWindow, "Hello World");
+			printf("setting %s\n", buffer);
+			status = XGetWMName(display, defaultRootWindow, &prop);
+			if (status)
+			{
+				prop.value = buffer;	
+				XSetWMName(display, defaultRootWindow, &prop);
+			}
+			else
+			{
+				fprintf(stderr, "Failed to get the WM name property\n");
+				stop = 1;	
+				retval = 9;
+			}
 			/*
 			XStoreName(display, 
 				defaultRootWindow, 
@@ -45,7 +61,6 @@ int main(int argc, char *argv[])
 			sleep(10);
 		}
 		XCloseDisplay(display);
-		retval = !clock_error;
 	}
 	return retval;	
 }
