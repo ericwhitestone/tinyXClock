@@ -5,35 +5,48 @@
 #include <unistd.h>
 #include <X11/Xutil.h>
 
+int errorHandler(Display *dpy, XErrorEvent *event)
+{
+	fprintf(stderr, "Error event occured\n");
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
-	int retval = 9;
+	int retval = 0;
 	Display *display = NULL;
 	Window defaultRootWindow;
 	volatile int stop = 0;
 	struct tm *tm;
 	time_t timeval;
-	int status = 0;
 	char buffer[64];
-	char *error = "Clock Error" ;
-	int clock_error = 0;
-	XTextProperty prop;
+	int nprops;
+	Atom *alist = NULL;
+	int i;
 
 	display = XOpenDisplay(NULL);
+	XSetErrorHandler(errorHandler);
 	if(display)
 	{
 		defaultRootWindow = XDefaultRootWindow(display);
-		while (!stop)
+		while (!stop && ! retval)
 		{
+			alist = XListProperties(display, defaultRootWindow, &nprops);
+			printf("properties: %d\n", nprops);
+			for (i=0; i<nprops; i++)
+			{
+				printf("%s\n", XGetAtomName(display, alist[i]));
+			}
+
+
 			timeval = time(NULL);		
 			tm = localtime(&timeval);
 			if (tm == NULL)
 			{
-				clock_error = 1;	
 				retval = 8;
-				stop = 1;
+				snprintf(buffer, sizeof(buffer),"Clock error");
 			}
-			if (!clock_error)
+			if (!retval)
 			{
 				strftime(buffer,
 					sizeof(buffer), 
@@ -41,23 +54,8 @@ int main(int argc, char *argv[])
 					tm);
 			}
 			printf("setting %s\n", buffer);
-			status = XGetWMName(display, defaultRootWindow, &prop);
-			if (status)
-			{
-				prop.value = buffer;	
-				XSetWMName(display, defaultRootWindow, &prop);
-			}
-			else
-			{
-				fprintf(stderr, "Failed to get the WM name property\n");
-				stop = 1;	
-				retval = 9;
-			}
-			/*
-			XStoreName(display, 
-				defaultRootWindow, 
-				!clock_error ? buffer : "Clock Error");
-			*/
+			XStoreName(display, defaultRootWindow, buffer);
+			XFlush(display);
 			sleep(10);
 		}
 		XCloseDisplay(display);

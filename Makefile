@@ -1,5 +1,5 @@
 
-CFLAGS= -lX11
+CFLAGS= -lX11 -Wall
 
 default: setrootprop 
 
