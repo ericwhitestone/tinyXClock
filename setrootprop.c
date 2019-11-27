@@ -38,9 +38,6 @@ int main(int argc, char *argv[])
 	struct tm *tm;
 	time_t timeval;
 	char buffer[64];
-	int nprops;
-	Atom *alist = NULL;
-	int i;
 
 	display = XOpenDisplay(NULL);
 	XSetErrorHandler(errorHandler);
@@ -50,14 +47,6 @@ int main(int argc, char *argv[])
 		defaultRootWindow = XDefaultRootWindow(display);
 		while (!stop && ! retval)
 		{
-			alist = XListProperties(display, defaultRootWindow, &nprops);
-			printf("properties: %d\n", nprops);
-			for (i=0; i<nprops; i++)
-			{
-				printf("%s\n", XGetAtomName(display, alist[i]));
-			}
-
-
 			timeval = time(NULL);		
 			tm = localtime(&timeval);
 			if (tm == NULL)
