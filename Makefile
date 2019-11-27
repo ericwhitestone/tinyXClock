@@ -1,8 +1,8 @@
 
 CFLAGS= -lX11 -Wall
 
-default: setrootprop 
+default: tinyXClock
 
 .PHONY:
-clean: setrootprop
-	rm -f setrootprop
+clean: tinyXClock
+	rm -f tinyXClock
