@@ -7,6 +7,8 @@
 #include <signal.h>
 
 volatile sig_atomic_t stop = 0;
+volatile int retval = 0;
+
 void terminationHandler(int signum)
 {
 	stop = 1;	
@@ -15,7 +17,8 @@ void terminationHandler(int signum)
 int errorHandler(Display *dpy, XErrorEvent *event)
 {
 	fprintf(stderr, "Error event occured\n");
-	return 0;
+	retval = 9;
+	return retval;
 }
 
 void setHandler()
@@ -32,7 +35,6 @@ void setHandler()
 
 int main(int argc, char *argv[])
 {
-	int retval = 0;
 	Display *display = NULL;
 	Window defaultRootWindow;
 	struct tm *tm;
@@ -61,7 +63,6 @@ int main(int argc, char *argv[])
 					"%H:%M:%S", 
 					tm);
 			}
-			printf("setting %s\n", buffer);
 			XStoreName(display, defaultRootWindow, buffer);
 			XFlush(display);
 			sleep(10);
