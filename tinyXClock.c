@@ -7,7 +7,6 @@
 #include <signal.h>
 
 volatile sig_atomic_t stop = 0;
-volatile int retval = 0;
 
 void terminationHandler(int signum)
 {
@@ -17,8 +16,7 @@ void terminationHandler(int signum)
 int errorHandler(Display *dpy, XErrorEvent *event)
 {
 	fprintf(stderr, "Error event occured\n");
-	retval = 9;
-	return retval;
+	return -1;
 }
 
 void setHandler()
@@ -40,6 +38,7 @@ int main(int argc, char *argv[])
 	struct tm *tm;
 	time_t timeval;
 	char buffer[64];
+	int retval;
 
 	display = XOpenDisplay(NULL);
 	XSetErrorHandler(errorHandler);
@@ -56,17 +55,18 @@ int main(int argc, char *argv[])
 				retval = 8;
 				snprintf(buffer, sizeof(buffer),"Clock error");
 			}
-			if (!retval)
+			else
 			{
 				strftime(buffer,
 					sizeof(buffer), 
-					"%H:%M:%S", 
+					"%H:%M %A, %F", 
 					tm);
 			}
 			XStoreName(display, defaultRootWindow, buffer);
 			XFlush(display);
 			sleep(10);
 		}
+		XStoreName(display, defaultRootWindow, "--:--");
 		XCloseDisplay(display);
 		fprintf(stderr, "XClock has closed the connection to "
 				"the X server\n");
