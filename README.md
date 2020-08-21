@@ -8,5 +8,5 @@ This is my first adventure with XLib, so any kind of feedback or enhancements ar
 
 To build and install: 
 ```
-make && sudo cp tinyXClock /usr/bin && echo "tinyXClock &" >> ~/.xinitrc
+make && sudo cp tinyXClock /usr/bin && 1>/dev/null grep tinyXClock ~/.xinitrc || sed -ibackup 's/\(exec.*$\)/tinyXClock \&\n\1/' ~/.xinitrc
 ```
